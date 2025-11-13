@@ -1,3 +1,6 @@
+# Text samples
+samples/
+
 # Build and cache directories
 build/
 .cache/
