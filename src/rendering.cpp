@@ -30,10 +30,10 @@ bool initialize(int width, int height, SDL_Window** window, SDL_Renderer** rende
         std::cerr << "Error creating renderer: " << SDL_GetError() << "\n";
         return false;
     }
-    SDL_SetRenderDrawColor(*renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    SDL_SetRenderDrawColor(*renderer, 0x14, 0x08, 0x40, 0xFF);
 
     // initialize other SDL libraries
-    if (!init_libraries()) { return false; }
+    // if (!init_libraries()) { return false; }
 
     return true;
 }
@@ -58,10 +58,10 @@ SDL_Texture* load_texture(std::string path, SDL_Renderer* renderer) {
 }
 
 void cleanup(SDL_Texture* texture, SDL_Renderer* renderer, SDL_Window* window) {
-    SDL_DestroyTexture(texture);
+    //SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
-    IMG_Quit();
+    //IMG_Quit();
     SDL_Quit();
 }
 
