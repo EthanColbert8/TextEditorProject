@@ -1,8 +1,10 @@
-//#include <iostream>
+#include <iostream>
 #include <SDL.h>
 #include <SDL_ttf.h>
 
 #include "rendering.h"
+
+float get_framerate(int numFrames);
 
 int main (int argc, char* argv[]) {
     SDL_Window* window = nullptr;
@@ -15,6 +17,7 @@ int main (int argc, char* argv[]) {
 
     int width = 800;
     int height = 600;
+    int framesRendered = 0;
 
     // Do SDL and renderer initialization
     if (!initialize(width, height, &window, &renderer)) { return 1; }
@@ -44,6 +47,11 @@ int main (int argc, char* argv[]) {
             }
         }
 
+        framesRendered += 1;
+        if (framesRendered % 10000 == 0) {
+            std::cout << "Avg framerate after " << framesRendered << " frames: " << get_framerate(framesRendered) << "\n";
+        }
+
         rect.x = width/4;
         rect.y = height/4;
         rect.w = width/2;
@@ -70,4 +78,9 @@ int main (int argc, char* argv[]) {
     cleanup(font, textTexture, renderer, window);
 
     return 0;
+}
+
+float get_framerate(int numFrames) {
+    float milliSeconds = (float)SDL_GetTicks();
+    return (numFrames / milliSeconds) * 1000.0f;
 }
