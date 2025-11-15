@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <SDL.h>
-#include <SDL_image.h>
+#include <SDL_ttf.h>
 
 #include "rendering.h"
 #include "SDL_render.h"
@@ -30,38 +30,74 @@ bool initialize(int width, int height, SDL_Window** window, SDL_Renderer** rende
         std::cerr << "Error creating renderer: " << SDL_GetError() << "\n";
         return false;
     }
+
+    if (SDL_SetRenderDrawBlendMode(*renderer, SDL_BLENDMODE_BLEND) != 0) {
+        std::cerr << "Error setting blend mode: " << SDL_GetError() << "\n";
+        return false;
+    }
+
     SDL_SetRenderDrawColor(*renderer, 0x14, 0x08, 0x40, 0xFF);
 
     // initialize other SDL libraries
-    // if (!init_libraries()) { return false; }
+    if (!init_libraries()) { return false; }
 
     return true;
 }
 
-SDL_Texture* load_texture(std::string path, SDL_Renderer* renderer) {
+TTF_Font* load_font(std::string path, int ptsize) {
+    TTF_Font* font = NULL;
+
+    font = TTF_OpenFont(path.c_str(), ptsize);
+    if (font == NULL) {
+        std::cerr << "Error loading font: " << TTF_GetError() << "\n";
+    }
+
+    return font;
+}
+
+SDL_Texture* load_font_texture(std::string text, SDL_Color color, TTF_Font* font, SDL_Renderer* renderer) {
     SDL_Texture* texture = NULL;
 
-    SDL_Surface* imageSurface = IMG_Load(path.c_str());
-    if (imageSurface == NULL) {
-        std::cerr << "Error loading image: " << IMG_GetError() << "\n";
+    SDL_Surface* textSurface = TTF_RenderText_Blended(font, text.c_str(), color);
+    if (textSurface == NULL) {
+        std::cerr << "Error creating text surface: " << TTF_GetError() << "\n";
         return texture;
     }
 
-    texture = SDL_CreateTextureFromSurface(renderer, imageSurface);
+    texture = SDL_CreateTextureFromSurface(renderer, textSurface);
     if (texture == NULL) {
         std::cerr << "Error creating texture: " << SDL_GetError() << "\n";
-        //return texture;
     }
 
-    SDL_FreeSurface(imageSurface);
+    SDL_FreeSurface(textSurface);
     return texture;
 }
 
-void cleanup(SDL_Texture* texture, SDL_Renderer* renderer, SDL_Window* window) {
-    //SDL_DestroyTexture(texture);
+// SDL_Texture* load_texture(std::string path, SDL_Renderer* renderer) {
+//     SDL_Texture* texture = NULL;
+
+//     SDL_Surface* imageSurface = IMG_Load(path.c_str());
+//     if (imageSurface == NULL) {
+//         std::cerr << "Error loading image: " << IMG_GetError() << "\n";
+//         return texture;
+//     }
+
+//     texture = SDL_CreateTextureFromSurface(renderer, imageSurface);
+//     if (texture == NULL) {
+//         std::cerr << "Error creating texture: " << SDL_GetError() << "\n";
+//         //return texture;
+//     }
+
+//     SDL_FreeSurface(imageSurface);
+//     return texture;
+// }
+
+void cleanup(TTF_Font* font, SDL_Texture* texture, SDL_Renderer* renderer, SDL_Window* window) {
+    TTF_CloseFont(font);
+    SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
-    //IMG_Quit();
+    TTF_Quit();
     SDL_Quit();
 }
 
@@ -69,11 +105,16 @@ void cleanup(SDL_Texture* texture, SDL_Renderer* renderer, SDL_Window* window) {
  * Helper function to load additional libraries.
  */
 bool init_libraries() {
-    int imgFlags = IMG_INIT_JPG;
-    // Weird logic to test whether the flags we need are returned,
-    // which happens if the library initialized them successfully.
-    if (!(IMG_Init(imgFlags) & imgFlags)) {
-        std::cerr << "Error initializing image library: " << IMG_GetError() << "\n";
+    // int imgFlags = IMG_INIT_JPG;
+    // // Weird logic to test whether the flags we need are returned,
+    // // which happens if the library initialized them successfully.
+    // if (!(IMG_Init(imgFlags) & imgFlags)) {
+    //     std::cerr << "Error initializing image library: " << IMG_GetError() << "\n";
+    //     return false;
+    // }
+
+    if (TTF_Init() != 0) {
+        std::cerr << "Error initializing TrueType Font library: " << TTF_GetError() << "\n";
         return false;
     }
 
